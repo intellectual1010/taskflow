@@ -72,15 +72,27 @@ builder.Services
 builder.Services.AddAuthorization();
 
 var frontendUrl =
-    builder.Configuration["FrontendUrl"]
-    ?? "http://localhost:5173";
+    builder.Configuration["FrontendUrl"];
+
+var allowedOrigins = new List<string>
+{
+    "http://localhost:5173",
+    "http://127.0.0.1:5173"
+};
+
+if (!string.IsNullOrWhiteSpace(frontendUrl))
+{
+    allowedOrigins.Add(
+        frontendUrl.TrimEnd('/')
+    );
+}
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>
     {
         policy
-            .WithOrigins(frontendUrl)
+            .WithOrigins(allowedOrigins.ToArray())
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
