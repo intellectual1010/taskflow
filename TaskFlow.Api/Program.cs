@@ -89,14 +89,17 @@ builder.Services.AddCors(options =>
 // OpenAPI
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+
+app.UseSwaggerUI(options =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "TaskFlow API v1");
-    });
-}
+    options.SwaggerEndpoint(
+        "/swagger/v1/swagger.json",
+        "TaskFlow API v1"
+    );
+
+    options.RoutePrefix = "swagger";
+});
 
 app.UseHttpsRedirection();
 
@@ -106,5 +109,18 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapGet("/", () => Results.Ok(new
+{
+    service = "TaskFlow API",
+    status = "running",
+    version = "1.0"
+}));
+
+app.MapGet("/health", () => Results.Ok(new
+{
+    status = "healthy",
+    timestamp = DateTime.UtcNow
+}));
 
 app.Run();
